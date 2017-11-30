@@ -1,20 +1,28 @@
 group 'mayer.pub'
-version '1.0-SNAPSHOT'
+version '0.1.1'
+
+buildscript {
+	repositories {
+		jcenter()
+	}
+	dependencies {
+		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+	}
+}
 
 apply plugin: 'java'
 apply plugin: 'antlr'
 apply plugin: 'idea'
+apply plugin: 'com.jfrog.bintray'
 
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
 
 repositories {
 	jcenter()
 }
 
 dependencies {
-	compile fileTree(dir: 'libs', include: ['*.jar'])
-
 	antlr 'org.antlr:antlr4:4.5.3'
 
 	testCompile "org.antlr:antlr4-runtime:4.5.3"
@@ -33,7 +41,7 @@ compileJava {
 }
 
 clean {
-	delete 'src/generated'
+	delete file("src/generated")
 }
 
 idea {
@@ -41,3 +49,25 @@ idea {
 		sourceDirs += file("src/generated/java")
 	}
 }
+
+bintray {
+	user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+	key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_KEY')
+	filesSpec {
+		from 'build/libs'
+		into '.'
+	}
+	pkg {
+		repo = 'betazoid'
+		name = project.name
+		publicDownloadNumbers = true
+		version {
+			name = project.version
+		}
+	}
+}
+
+task wrapper(type: Wrapper) {
+	gradleVersion = '2.4'
+}
+
